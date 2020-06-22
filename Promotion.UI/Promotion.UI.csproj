@@ -11,4 +11,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\Promotion.Data\Promotion.Data.csproj" />
+    <ProjectReference Include="..\Promotion.Service\Promotion.Service.csproj" />
+  </ItemGroup>
+
 </Project>

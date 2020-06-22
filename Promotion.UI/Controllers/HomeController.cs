@@ -1,29 +1,67 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Promotion.Data.Entities;
+using Promotion.Service.IService;
+using Promotion.ViewModels;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Promotion.UI.Models;
 
 namespace Promotion.UI.Controllers
 {
     public class HomeController : Controller
     {
+        public IProductService _productService = null;
+        ILogger<HomeController> _logger = null;
+        public HomeController(IProductService productService, ILogger<HomeController> logger)
+        {
+            _productService = productService;
+            _logger = logger;
+        }
         public IActionResult Index()
         {
-            return View();
+            try
+            {
+                ProductVM productList = new ProductVM();
+                productList.products = _productService.GetProducts().ToList();
+                productList.discounts = _productService.GetDiscounts().ToList();
+                return View(productList);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.InnerException.ToString());
+                return null;
+            }
         }
 
-        public IActionResult Privacy()
+        [HttpGet]
+        public IActionResult Load(string rules, string productObj)
         {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            try
+            {
+                List<CartSummary> cartSummary = new List<CartSummary>();
+                List<int> ids = JsonConvert.DeserializeObject<List<int>>(rules);
+                List<Product> products = JsonConvert.DeserializeObject<List<Product>>(productObj);
+                foreach (Product product in products)
+                {
+                    CartSummary cart = new CartSummary();
+                    cart.ProductId = product.ProductId;
+                    cart.Title = product.Title;
+                    cart.Qty = product.Qty;
+                    cart.TotalPrice = product.Qty * product.UnitPrice;
+                    cart.DiscountedPrice = _productService.GetDiscountedPrice(product, products, ids.Count > 0? ids : null);
+                    cartSummary.Add(cart);
+                }
+                ProductVM productList = new ProductVM();
+                productList.CartSummary = cartSummary;
+                return PartialView("_CartSummary", productList);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.InnerException.ToString());
+                return null;
+            }
         }
     }
 }

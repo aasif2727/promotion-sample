@@ -1,8 +1,106 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-
+@using Promotion.Data.Entities
+@model Promotion.ViewModels.ProductVM
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <form method="post">
+        <div class="row">
+            <div class="card" style="width: 30rem;">
+                <div class="card-header">
+                    Products:
+                </div>
+                <table class="card-table table">
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Unit Cost(₹)</th>
+                            <th scope="col">Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+                            if (Model.products.Count > 0)
+                            {
+                                foreach (Product prod in Model.products)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="products" class="form-check-input" id="@string.Format("chkProd_{0}", prod.ProductId)">
+                                            </div>
+                                        </td>
+                                        <td id="@string.Format("name_{0}", prod.ProductId)">@prod.Title</td>
+                                        <td id="@string.Format("price_{0}", prod.ProductId)">@prod.UnitPrice</td>
+                                        <td>
+                                            <input type="number" name="Qty" value="@prod.Qty" id="@string.Format("qty_{0}", prod.ProductId)" />
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="4">No products found!</td></tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card" style="width: 30rem;margin-left:50px;">
+                <div class="card-header">
+                    Promotions:
+                </div>
+                <table class="card-table table">
+                    <thead>
+                        <tr>
+                            <td scope="col"></td>
+                            <th scope="col">Rule</th>
+                            <th scope="col">Min. Qty</th>
+                            <th scope="col">Discount(%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+                            if (Model.discounts.Count > 0)
+                            {
+                                foreach (Discount prom in Model.discounts)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="promotionRule" class="form-check-input" id="@string.Format("chkPromo_{0}", prom.DiscountId)">
+                                            </div>
+                                        </td>
+                                        <td>@prom.DiscountRule</td>
+                                        <td>@prom.MinQty</td>
+                                        <td>@prom.DiscountPercentage</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="4">No promotions found!</td></tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div style="float:left;">
+                <a onclick="loadCart()" class="btn btn-success form-control">Load Cart</a>
+            </div>
+        </div>
+
+    </form>
+    <div id="cart">
+
+    </div>
+    <partial name="_CartSummary" model="Model" />
 </div>
+
+
